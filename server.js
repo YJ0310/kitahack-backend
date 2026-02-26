@@ -28,20 +28,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ─── Global Middleware ───────────────────────────────────────────────────────
+// Disable CSP entirely — Flutter Web (WASM) + Google Fonts + Firebase Auth
+// all require very permissive policies; helmet's default CSP breaks them.
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-      imgSrc: ["'self'", "data:", "blob:", "https:"],
-      connectSrc: ["'self'", "https://fonts.gstatic.com", "https://fonts.googleapis.com", "https://firestore.googleapis.com", "https://www.googleapis.com", "https://securetoken.googleapis.com", "https://identitytoolkit.googleapis.com", "https://apis.google.com", "https://accounts.google.com", "https://firebasestorage.googleapis.com", "wss:", "ws:"],
-      workerSrc: ["'self'", "blob:"],
-      childSrc: ["'self'", "blob:"],
-      frameSrc: ["'self'", "https://accounts.google.com", "https://apis.google.com", "https://kitahack-tehais.firebaseapp.com"],
-    },
-  },
+  contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
   crossOriginOpenerPolicy: false,
 }));
@@ -170,10 +160,18 @@ app.all('/api/*', (req, res) => {
 
 // ─── Serve Flutter Web Build (App Hosting) ───────────────────────────────────
 const publicDir = path.join(__dirname, 'public');
-app.use(express.static(publicDir));
+app.use(express.static(publicDir, {
+  setHeaders: (res, filePath) => {
+    // Prevent caching of index.html so CSP / SW updates propagate immediately
+    if (filePath.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  },
+}));
 
 // SPA fallback — serve index.html for all non-API routes (client-side routing)
 app.get('*', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 
