@@ -1,0 +1,6 @@
+node_modules/
+.env
+*-adminsdk-*.json
+firestore_export_*.json
+*.log
+.DS_Store
