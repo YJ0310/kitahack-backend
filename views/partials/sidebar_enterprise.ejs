@@ -1,0 +1,45 @@
+<%# Enterprise Sidebar %>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo enterprise">
+      <span class="material-icons-round" style="font-size:20px;color:white">business_center</span>
+    </div>
+    <span class="sidebar-title">Enterprise</span>
+  </div>
+
+  <div class="user-chip">
+    <div class="avatar enterprise"><%= user && user.name ? user.name.charAt(0).toUpperCase() : 'T' %></div>
+    <div class="user-info">
+      <div class="user-name"><%= user ? (user.companyName || user.name) : 'Enterprise' %></div>
+      <div class="user-role">Enterprise</div>
+    </div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item">
+      <a href="/enterprise" class="nav-link <%= currentPath === '/enterprise' ? 'active enterprise' : '' %>">
+        <span class="icon material-icons-round">dashboard</span>
+        <span>Dashboard</span>
+        <% if (currentPath === '/enterprise') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="/enterprise/candidates" class="nav-link <%= currentPath === '/enterprise/candidates' ? 'active enterprise' : '' %>">
+        <span class="icon material-icons-round">person_search</span>
+        <span>Candidate Search</span>
+        <% if (currentPath === '/enterprise/candidates') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="theme-icon">☀️</span>
+      <span class="theme-toggle-label">Switch to Light</span>
+    </button>
+    <a href="/logout" class="logout-btn">
+      <span class="material-icons-round" style="font-size:18px">logout</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>

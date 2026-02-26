@@ -1,0 +1,64 @@
+<%# Student Sidebar %>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">🍵</div>
+    <span class="sidebar-title">Teh Ais</span>
+  </div>
+
+  <div class="user-chip">
+    <div class="avatar"><%= user && user.name ? user.name.charAt(0).toUpperCase() : 'A' %></div>
+    <div class="user-info">
+      <div class="user-name"><%= user ? user.name : 'Student' %></div>
+      <div class="user-role">Student</div>
+    </div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item">
+      <a href="/student" class="nav-link <%= currentPath === '/student' ? 'active' : '' %>">
+        <span class="icon material-icons-round">dashboard</span>
+        <span>Dashboard</span>
+        <% if (currentPath === '/student') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="/student/event" class="nav-link <%= currentPath === '/student/event' ? 'active' : '' %>">
+        <span class="icon material-icons-round">calendar_month</span>
+        <span>Events</span>
+        <% if (currentPath === '/student/event') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="/student/team" class="nav-link <%= currentPath === '/student/team' ? 'active' : '' %>">
+        <span class="icon material-icons-round">groups</span>
+        <span>Teams & Pairing</span>
+        <% if (currentPath === '/student/team') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="/student/profile" class="nav-link <%= currentPath === '/student/profile' ? 'active' : '' %>">
+        <span class="icon material-icons-round">person</span>
+        <span>Profile & Tags</span>
+        <% if (currentPath === '/student/profile') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="/student/chat" class="nav-link <%= currentPath === '/student/chat' ? 'active' : '' %>">
+        <span class="icon material-icons-round">chat_bubble</span>
+        <span>Chat</span>
+        <% if (currentPath === '/student/chat') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="theme-icon">☀️</span>
+      <span class="theme-toggle-label">Switch to Light</span>
+    </button>
+    <a href="/logout" class="logout-btn">
+      <span class="material-icons-round" style="font-size:18px">logout</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>

@@ -1,0 +1,144 @@
+<%- include('../partials/head') %>
+
+<%- include('../partials/sidebar_student') %>
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+
+    <!-- Mobile header -->
+    <div class="mobile-header">
+      <button class="hamburger-btn" onclick="toggleSidebar()">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <div class="logo-area">
+        <span style="font-size:24px">🍵</span>
+        <span class="font-bold">Teh Ais</span>
+      </div>
+      <button class="theme-pill" onclick="toggleTheme()">
+        <span class="theme-icon">☀️</span>
+      </button>
+    </div>
+
+    <%- include('../partials/topbar', { shell: 'student' }) %>
+
+    <div class="page-content">
+
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <h2>Welcome back, <%= user.name || 'Student' %> 👋</h2>
+        <p>Check your AI insights, upcoming events, and team status.</p>
+        <div class="flex gap-3" style="flex-wrap:wrap">
+          <a href="/student/event" class="btn btn-sm" style="background:white;color:var(--primary);">Browse Events</a>
+          <a href="/student/team" class="btn btn-sm btn-ghost" style="color:white;border:1px solid rgba(255,255,255,0.3);">Find Teammates</a>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon purple"><span class="material-icons-round">calendar_month</span></div>
+          <div class="stat-value"><%= events.length %></div>
+          <div class="stat-label">Available Events</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon pink"><span class="material-icons-round">groups</span></div>
+          <div class="stat-value"><%= matches.length %></div>
+          <div class="stat-label">Matches</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange"><span class="material-icons-round">emoji_events</span></div>
+          <div class="stat-value"><%= (user.skillTags || []).length %></div>
+          <div class="stat-label">Skills Tagged</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon teal"><span class="material-icons-round">hub</span></div>
+          <div class="stat-value"><%= posts.length %></div>
+          <div class="stat-label">Collab Posts</div>
+        </div>
+      </div>
+
+      <!-- AI Insights -->
+      <div class="ai-banner">
+        <h3><span class="material-icons-round" style="vertical-align:middle;margin-right:8px;">smart_toy</span>AI Executive Summary</h3>
+        <p>Based on your skill profile (<%= (user.skillTags || []).map(t => t.name).slice(0, 3).join(', ') || 'no tags yet' %>), we've found <strong><%= matches.length %></strong> potential matches. Consider exploring upcoming events to expand your network.</p>
+      </div>
+
+      <!-- Upcoming Events Section -->
+      <div class="section">
+        <div class="section-header">
+          <h3 class="section-title">Upcoming Events</h3>
+          <a href="/student/event" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+        <div class="grid-3">
+          <% events.slice(0, 6).forEach(event => { %>
+            <div class="event-card">
+              <div class="event-date">
+                <span class="material-icons-round" style="font-size:14px">schedule</span>
+                <%= event.formattedDate || 'TBD' %>
+              </div>
+              <div class="event-title"><%= event.title || 'Untitled Event' %></div>
+              <div class="event-location">
+                <span class="material-icons-round" style="font-size:14px">location_on</span>
+                <%= event.location || 'Online' %>
+              </div>
+              <div style="margin-top:12px;">
+                <% if (event.is_all_majors) { %>
+                  <span class="chip chip-green">All Majors</span>
+                <% } else { %>
+                  <span class="chip">Targeted</span>
+                <% } %>
+                <% if (event.is_official) { %>
+                  <span class="chip chip-blue">Official</span>
+                <% } %>
+              </div>
+            </div>
+          <% }); %>
+          <% if (events.length === 0) { %>
+            <div class="empty-state" style="grid-column:1/-1;">
+              <div class="icon">📅</div>
+              <h3>No events yet</h3>
+              <p>Check back soon for upcoming events.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Matches Section -->
+      <div class="section">
+        <div class="section-header">
+          <h3 class="section-title">Your Matches</h3>
+          <a href="/student/team" class="btn btn-ghost btn-sm">View All →</a>
+        </div>
+        <div class="grid-2">
+          <% matches.slice(0, 4).forEach(match => { %>
+            <div class="match-card">
+              <div class="match-score <%= match.score >= 0.85 ? 'score-high' : match.score >= 0.7 ? 'score-mid' : 'score-low' %>">
+                <%= match.score ? Math.round(match.score * 100) + '%' : '—' %>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div class="font-semibold text-sm"><%= match.match_type === 'AI_Recommendation' ? '🤖 AI Recommendation' : '✋ Organic Application' %></div>
+                <div class="text-secondary text-xs" style="margin-top:4px;"><%= match.reason || 'No reason provided' %></div>
+                <div style="margin-top:8px;">
+                  <span class="chip <%= match.match_status === 'Accepted' ? 'chip-green' : match.match_status === 'Rejected' ? 'chip-red' : match.match_status === 'Recommended' ? 'chip-purple' : 'chip-amber' %>">
+                    <%= match.match_status || 'Pending' %>
+                  </span>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+          <% if (matches.length === 0) { %>
+            <div class="empty-state" style="grid-column:1/-1;">
+              <div class="icon">🤝</div>
+              <h3>No matches yet</h3>
+              <p>Complete your profile and add skills to get AI recommendations.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

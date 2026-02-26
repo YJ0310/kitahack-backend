@@ -1,0 +1,101 @@
+<%- include('../partials/head') %>
+
+<%- include('../partials/sidebar_school') %>
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+    <div class="mobile-header">
+      <button class="hamburger-btn" onclick="toggleSidebar()">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <div class="logo-area">
+        <span style="font-size:24px">🍵</span>
+        <span class="font-bold">Network</span>
+      </div>
+      <button class="theme-pill" onclick="toggleTheme()">
+        <span class="theme-icon">☀️</span>
+      </button>
+    </div>
+
+    <%- include('../partials/topbar', { shell: 'school' }) %>
+
+    <div class="page-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <div>
+          <h2 style="margin-bottom:4px;">Enterprise Network</h2>
+          <p class="text-secondary text-sm">Connect with enterprises looking for talent from your institution</p>
+        </div>
+        <div class="text-sm text-secondary"><%= enterprises.length %> enterprise(s)</div>
+      </div>
+
+      <!-- Search -->
+      <div class="card mb-4">
+        <div class="search-box" style="max-width:400px;">
+          <span class="search-icon material-icons-round">search</span>
+          <input type="text" class="form-input" placeholder="Search enterprises..." id="searchInput" oninput="filterEnterprises()">
+        </div>
+      </div>
+
+      <!-- Enterprise Grid -->
+      <div class="grid grid-3" id="enterpriseGrid">
+        <% if (enterprises.length > 0) { %>
+          <% enterprises.forEach(ent => { %>
+            <div class="card enterprise-item" data-name="<%= (ent.name || '').toLowerCase() %>" data-tags="<%= (ent.tags || []).join(' ').toLowerCase() %>">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="avatar" style="width:48px;height:48px;font-size:18px;background:#A855F720;color:#A855F7;">
+                  <%= (ent.name || 'E').charAt(0) %>
+                </div>
+                <div>
+                  <div class="font-semibold"><%= ent.name || 'Enterprise' %></div>
+                  <div class="text-xs text-secondary"><%= ent.email || '' %></div>
+                </div>
+              </div>
+
+              <% if (ent.description) { %>
+                <p class="text-sm text-secondary mb-3"><%= ent.description %></p>
+              <% } %>
+
+              <% if (ent.tags && ent.tags.length > 0) { %>
+                <div class="mb-3">
+                  <div class="text-xs text-secondary mb-1">Looking for:</div>
+                  <div class="flex gap-1" style="flex-wrap:wrap;">
+                    <% ent.tags.slice(0, 5).forEach(tag => { %>
+                      <span class="chip" style="font-size:10px;padding:2px 8px;background:#A855F715;color:#A855F7;"><%= tag %></span>
+                    <% }); %>
+                    <% if (ent.tags.length > 5) { %>
+                      <span class="text-xs text-secondary">+<%= ent.tags.length - 5 %></span>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+
+              <button class="btn btn-outline btn-sm" style="width:100%;">
+                <span class="material-icons-round" style="font-size:16px;margin-right:4px;">mail</span>
+                Contact
+              </button>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div style="grid-column:1/-1;" class="card text-center">
+            <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:12px;opacity:.4;color:var(--text-secondary);">business_center</span>
+            <div class="text-secondary">No enterprises found in the network yet.</div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function filterEnterprises() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.enterprise-item').forEach(el => {
+      const name = el.dataset.name || '';
+      const tags = el.dataset.tags || '';
+      el.style.display = (name.includes(query) || tags.includes(query)) ? '' : 'none';
+    });
+  }
+</script>
+
+<%- include('../partials/footer') %>

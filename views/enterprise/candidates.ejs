@@ -1,0 +1,140 @@
+<%- include('../partials/head') %>
+
+<%- include('../partials/sidebar_enterprise') %>
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+    <div class="mobile-header">
+      <button class="hamburger-btn" onclick="toggleSidebar()">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <div class="logo-area">
+        <span style="font-size:24px">🍵</span>
+        <span class="font-bold">Candidates</span>
+      </div>
+      <button class="theme-pill" onclick="toggleTheme()">
+        <span class="theme-icon">☀️</span>
+      </button>
+    </div>
+
+    <%- include('../partials/topbar', { shell: 'enterprise' }) %>
+
+    <div class="page-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <div>
+          <h2 style="margin-bottom:4px;">Candidate Search</h2>
+          <p class="text-secondary text-sm">Find students matching your requirements</p>
+        </div>
+        <div class="text-sm text-secondary"><%= candidates.length %> result(s)</div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="card mb-4">
+        <form method="GET" action="/enterprise/candidates" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="flex:1;min-width:200px;">
+            <label class="text-xs font-semibold text-secondary" style="display:block;margin-bottom:6px;">Search</label>
+            <div class="search-box">
+              <span class="search-icon material-icons-round">search</span>
+              <input type="text" name="q" class="form-input" placeholder="Search by name, skill, or faculty..." value="<%= query || '' %>">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <span class="material-icons-round" style="font-size:18px;margin-right:4px;">search</span>
+            Search
+          </button>
+          <% if (query) { %>
+            <a href="/enterprise/candidates" class="btn btn-outline">Clear</a>
+          <% } %>
+        </form>
+      </div>
+
+      <!-- Results Grid -->
+      <div class="grid grid-3" id="candidateGrid">
+        <% if (candidates.length > 0) { %>
+          <% candidates.forEach(student => { %>
+            <div class="card" style="transition:transform .15s ease;cursor:pointer;" onmouseenter="this.style.transform='translateY(-2px)'" onmouseleave="this.style.transform=''">
+              <!-- Header -->
+              <div class="flex items-center gap-3 mb-3">
+                <div class="avatar" style="width:48px;height:48px;font-size:18px;">
+                  <%= (student.name || 'S').charAt(0) %>
+                </div>
+                <div style="flex:1;min-width:0;">
+                  <div class="font-semibold truncate"><%= student.name || 'Student' %></div>
+                  <div class="text-xs text-secondary"><%= student.email || '' %></div>
+                </div>
+              </div>
+
+              <!-- Info -->
+              <div style="margin-bottom:12px;">
+                <% if (student.matric_no) { %>
+                  <div class="text-sm mb-1">
+                    <span class="material-icons-round" style="font-size:14px;vertical-align:middle;margin-right:4px;color:var(--text-secondary);">badge</span>
+                    <%= student.matric_no %>
+                  </div>
+                <% } %>
+                <% if (student.major_id) { %>
+                  <div class="text-sm">
+                    <span class="material-icons-round" style="font-size:14px;vertical-align:middle;margin-right:4px;color:var(--text-secondary);">school</span>
+                    Major #<%= student.major_id %>
+                  </div>
+                <% } %>
+              </div>
+
+              <!-- Skills -->
+              <% if (student.skillTags && student.skillTags.length > 0) { %>
+                <div class="mb-3">
+                  <div class="text-xs text-secondary mb-1">Skills</div>
+                  <div class="flex gap-1" style="flex-wrap:wrap;">
+                    <% student.skillTags.slice(0, 5).forEach(t => { %>
+                      <span class="chip chip-primary" style="font-size:10px;padding:2px 8px;"><%= t.name %></span>
+                    <% }); %>
+                    <% if (student.skillTags.length > 5) { %>
+                      <span class="text-xs text-secondary">+<%= student.skillTags.length - 5 %> more</span>
+                    <% } %>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- Match Score (if applicable) -->
+              <% if (student.matchScore) { %>
+                <div style="background:linear-gradient(90deg,#A855F710,#EC489910);border-radius:8px;padding:8px 12px;margin-bottom:12px;">
+                  <div class="flex items-center" style="justify-content:space-between;">
+                    <span class="text-xs font-semibold" style="color:#A855F7;">AI Match Score</span>
+                    <span class="font-bold" style="color:#A855F7;"><%= student.matchScore %>%</span>
+                  </div>
+                </div>
+              <% } %>
+
+              <!-- Action -->
+              <button class="btn btn-outline btn-sm" style="width:100%;" onclick="viewProfile('<%= student.uid %>')">
+                <span class="material-icons-round" style="font-size:16px;margin-right:4px;">visibility</span>
+                View Profile
+              </button>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div style="grid-column:1/-1;" class="card text-center">
+            <span class="material-icons-round" style="font-size:48px;display:block;margin-bottom:12px;opacity:.4;color:var(--text-secondary);">person_search</span>
+            <div class="text-secondary mb-2">
+              <% if (query) { %>
+                No candidates found for "<%= query %>". Try different keywords.
+              <% } else { %>
+                Search for candidates by name, skill, or faculty.
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function viewProfile(uid) {
+    // Could open a modal or navigate to profile detail
+    alert('Profile detail view coming soon for: ' + uid);
+  }
+</script>
+
+<%- include('../partials/footer') %>

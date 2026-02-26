@@ -1,0 +1,167 @@
+<%- include('../partials/head') %>
+
+<%- include('../partials/sidebar_school') %>
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+    <div class="mobile-header">
+      <button class="hamburger-btn" onclick="toggleSidebar()">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <div class="logo-area">
+        <span style="font-size:24px">🍵</span>
+        <span class="font-bold">School</span>
+      </div>
+      <button class="theme-pill" onclick="toggleTheme()">
+        <span class="theme-icon">☀️</span>
+      </button>
+    </div>
+
+    <%- include('../partials/topbar', { shell: 'school' }) %>
+
+    <div class="page-content">
+      <!-- Welcome Banner -->
+      <div class="welcome-banner mb-4">
+        <div>
+          <h1 style="font-size:28px;margin-bottom:8px;">Welcome, <%= user.name || 'School Admin' %></h1>
+          <p style="opacity:.85;">Manage your institution's talent network and events</p>
+        </div>
+        <div style="font-size:48px;">🏫</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid mb-4">
+        <div class="stat-card">
+          <div class="stat-number"><%= studentCount %></div>
+          <div class="stat-label">Students</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number"><%= events.length %></div>
+          <div class="stat-label">Events</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number"><%= enterpriseCount %></div>
+          <div class="stat-label">Enterprises</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number"><%= tagStats.length %></div>
+          <div class="stat-label">Top Skills</div>
+        </div>
+      </div>
+
+      <!-- Two-column layout -->
+      <div class="grid grid-2 mb-4">
+        <!-- Recent Events -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h3>
+              <span class="material-icons-round" style="vertical-align:middle;margin-right:8px;font-size:20px;">event</span>
+              Recent Events
+            </h3>
+            <a href="/school/publish" class="btn btn-primary btn-sm">+ New Event</a>
+          </div>
+
+          <% if (events.length > 0) { %>
+            <% events.slice(0, 5).forEach(event => { %>
+              <div style="padding:12px 0;border-bottom:1px solid var(--border);">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                  <div>
+                    <div class="font-semibold"><%= event.event_title %></div>
+                    <div class="text-xs text-secondary mt-1">
+                      <span class="material-icons-round" style="font-size:14px;vertical-align:middle;">location_on</span>
+                      <%= event.location || 'TBA' %>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-xs text-secondary"><%= event.date || '' %></div>
+                    <% if (event.is_official) { %>
+                      <span class="chip chip-primary" style="font-size:10px;padding:2px 8px;margin-top:4px;">Official</span>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="text-secondary text-center" style="padding:32px;">
+              No events yet. <a href="/school/publish">Create your first event</a>.
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Tag Distribution -->
+        <div class="card">
+          <h3 class="mb-3">
+            <span class="material-icons-round" style="vertical-align:middle;margin-right:8px;font-size:20px;">analytics</span>
+            Top Skills in Network
+          </h3>
+
+          <% if (tagStats.length > 0) { %>
+            <% tagStats.slice(0, 8).forEach((stat, i) => { %>
+              <div style="margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                  <span class="text-sm font-semibold"><%= stat.tag %></span>
+                  <span class="text-xs text-secondary"><%= stat.count %> students</span>
+                </div>
+                <div style="height:6px;border-radius:3px;background:var(--border);overflow:hidden;">
+                  <div style="height:100%;border-radius:3px;background:<%= ['#14B8A6','#A855F7','#EC4899','#F97316','var(--primary)','#3B82F6','#EF4444','#6366F1'][i % 8] %>;width:<%= Math.min(100, (stat.count / (tagStats[0].count || 1)) * 100) %>%;"></div>
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div class="text-secondary text-center" style="padding:24px;">No skill data available yet.</div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Student Overview Table -->
+      <div class="card">
+        <h3 class="mb-3">
+          <span class="material-icons-round" style="vertical-align:middle;margin-right:8px;font-size:20px;">groups</span>
+          Student Directory
+        </h3>
+
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="border-bottom:2px solid var(--border);">
+                <th style="text-align:left;padding:10px 12px;font-size:12px;text-transform:uppercase;color:var(--text-secondary);">Name</th>
+                <th style="text-align:left;padding:10px 12px;font-size:12px;text-transform:uppercase;color:var(--text-secondary);">Matric No.</th>
+                <th style="text-align:left;padding:10px 12px;font-size:12px;text-transform:uppercase;color:var(--text-secondary);">Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (typeof students !== 'undefined' && students.length > 0) { %>
+                <% students.slice(0, 10).forEach(s => { %>
+                  <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:10px 12px;">
+                      <div class="flex items-center gap-2">
+                        <div class="avatar" style="width:28px;height:28px;font-size:10px;"><%= (s.name || 'S').charAt(0) %></div>
+                        <span class="font-semibold text-sm"><%= s.name || 'Unknown' %></span>
+                      </div>
+                    </td>
+                    <td style="padding:10px 12px;" class="text-sm"><%= s.matric_no || '-' %></td>
+                    <td style="padding:10px 12px;">
+                      <div class="flex gap-1" style="flex-wrap:wrap;">
+                        <% (s.skillTags || []).slice(0, 3).forEach(tag => { %>
+                          <span class="chip" style="font-size:10px;padding:2px 8px;"><%= tag.name %></span>
+                        <% }); %>
+                        <% if ((s.skillTags || []).length > 3) { %>
+                          <span class="text-xs text-secondary">+<%= s.skillTags.length - 3 %></span>
+                        <% } %>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="3" class="text-secondary text-center" style="padding:24px;">No students found.</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

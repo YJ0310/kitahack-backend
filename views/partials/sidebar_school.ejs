@@ -1,0 +1,52 @@
+<%# School Sidebar %>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo school">
+      <span class="material-icons-round" style="font-size:20px;color:white">school</span>
+    </div>
+    <span class="sidebar-title">School Portal</span>
+  </div>
+
+  <div class="user-chip">
+    <div class="avatar school"><%= user && user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+    <div class="user-info">
+      <div class="user-name"><%= user ? (user.institutionName || user.name) : 'School' %></div>
+      <div class="user-role">School Admin</div>
+    </div>
+  </div>
+
+  <ul class="nav-list">
+    <li class="nav-item">
+      <a href="/school" class="nav-link <%= currentPath === '/school' ? 'active school' : '' %>">
+        <span class="icon material-icons-round">dashboard</span>
+        <span>Dashboard</span>
+        <% if (currentPath === '/school') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="/school/publish" class="nav-link <%= currentPath === '/school/publish' ? 'active school' : '' %>">
+        <span class="icon material-icons-round">publish</span>
+        <span>Publish Content</span>
+        <% if (currentPath === '/school/publish') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="/school/enterprise_network" class="nav-link <%= currentPath === '/school/enterprise_network' ? 'active school' : '' %>">
+        <span class="icon material-icons-round">business</span>
+        <span>Enterprise Network</span>
+        <% if (currentPath === '/school/enterprise_network') { %><span class="active-dot"></span><% } %>
+      </a>
+    </li>
+  </ul>
+
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span class="theme-icon">☀️</span>
+      <span class="theme-toggle-label">Switch to Light</span>
+    </button>
+    <a href="/logout" class="logout-btn">
+      <span class="material-icons-round" style="font-size:18px">logout</span>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>

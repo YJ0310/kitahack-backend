@@ -1,0 +1,40 @@
+<%# Top Bar with breadcrumbs %>
+<%
+  const pathParts = currentPath.split('/').filter(Boolean);
+  const crumbLabels = {
+    'student': 'Student Portal',
+    'school': 'School Portal',
+    'enterprise': 'Enterprise Portal',
+    'event': 'Events',
+    'team': 'Teams & Pairing',
+    'profile': 'Profile & Tags',
+    'chat': 'Chat',
+    'publish': 'Publish Content',
+    'enterprise_network': 'Enterprise Network',
+    'candidates': 'Candidate Search',
+  };
+%>
+<div class="topbar">
+  <div class="breadcrumbs">
+    <a href="/">Home</a>
+    <% let cumulativePath = ''; %>
+    <% pathParts.forEach((part, i) => { %>
+      <% cumulativePath += '/' + part; %>
+      <span class="separator material-icons-round" style="font-size:14px">chevron_right</span>
+      <% if (i === pathParts.length - 1) { %>
+        <span class="current"><%= crumbLabels[part] || part.charAt(0).toUpperCase() + part.slice(1) %></span>
+      <% } else { %>
+        <a href="<%= cumulativePath %>"><%= crumbLabels[part] || part.charAt(0).toUpperCase() + part.slice(1) %></a>
+      <% } %>
+    <% }); %>
+  </div>
+  <div class="topbar-actions">
+    <button class="theme-pill" onclick="toggleTheme()">
+      <span class="theme-icon">☀️</span>
+      <span class="theme-label">Light</span>
+    </button>
+    <div class="topbar-avatar <%= shell === 'school' ? 'school' : shell === 'enterprise' ? 'enterprise' : '' %>" style="<%= shell === 'school' ? 'background:#009688' : shell === 'enterprise' ? 'background:#9C27B0' : '' %>">
+      <%= user && user.name ? user.name.charAt(0).toUpperCase() : 'A' %>
+    </div>
+  </div>
+</div>

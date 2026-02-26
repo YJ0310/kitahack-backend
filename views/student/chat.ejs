@@ -1,0 +1,147 @@
+<%- include('../partials/head') %>
+
+<%- include('../partials/sidebar_student') %>
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+    <div class="mobile-header">
+      <button class="hamburger-btn" onclick="toggleSidebar()">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <div class="logo-area">
+        <span style="font-size:24px">🍵</span>
+        <span class="font-bold">Chat</span>
+      </div>
+      <button class="theme-pill" onclick="toggleTheme()">
+        <span class="theme-icon">☀️</span>
+      </button>
+    </div>
+
+    <%- include('../partials/topbar', { shell: 'student' }) %>
+
+    <div class="page-content">
+      <h2 class="mb-4">Chat</h2>
+
+      <div class="alert alert-info mb-4">
+        <span class="material-icons-round" style="vertical-align:middle;margin-right:8px;font-size:18px;">info</span>
+        This is a temporary chat. Messages are stored in Firebase TempChats collection.
+      </div>
+
+      <div class="chat-layout" id="chatContainer">
+        <!-- Chat Sidebar -->
+        <div class="chat-sidebar">
+          <div style="padding:16px;">
+            <div class="search-box">
+              <span class="search-icon material-icons-round">search</span>
+              <input type="text" class="form-input" placeholder="Search conversations..." style="font-size:13px;">
+            </div>
+          </div>
+
+          <% if (chats.length > 0) { %>
+            <% chats.forEach((chat, i) => { %>
+              <div class="chat-item <%= i === 0 ? 'active' : '' %>" onclick="selectChat('<%= chat.id %>')">
+                <div class="flex items-center gap-3">
+                  <div class="avatar" style="width:32px;height:32px;font-size:11px;"><%= (chat.name || 'C').charAt(0) %></div>
+                  <div style="flex:1;min-width:0;">
+                    <div class="font-semibold text-sm truncate"><%= chat.name || 'Chat ' + (i + 1) %></div>
+                    <div class="text-xs text-secondary truncate"><%= chat.lastMessage || 'No messages yet' %></div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <!-- Mock conversations when no TempChats exist -->
+            <% ['Team Alpha', 'Hackathon Squad', 'Study Group'].forEach((name, i) => { %>
+              <div class="chat-item <%= i === 0 ? 'active' : '' %>">
+                <div class="flex items-center gap-3">
+                  <div class="avatar" style="width:32px;height:32px;font-size:11px;"><%= name.charAt(0) %></div>
+                  <div style="flex:1;min-width:0;">
+                    <div class="font-semibold text-sm truncate"><%= name %></div>
+                    <div class="text-xs text-secondary truncate">Click to start chatting</div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          <% } %>
+        </div>
+
+        <!-- Chat Main -->
+        <div class="chat-main">
+          <div style="padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;">
+            <div class="avatar" style="width:32px;height:32px;font-size:11px;">T</div>
+            <div>
+              <div class="font-semibold text-sm">Team Alpha</div>
+              <div class="text-xs text-secondary">3 members online</div>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chatMessages">
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <div class="avatar" style="width:28px;height:28px;font-size:10px;flex-shrink:0;">S</div>
+              <div>
+                <div class="text-xs text-secondary" style="margin-bottom:2px;">Sarah • 2:30 PM</div>
+                <div style="background:var(--background);padding:10px 14px;border-radius:0 12px 12px 12px;font-size:14px;max-width:400px;">
+                  Hey team! Have we decided on the tech stack for our hackathon project?
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-direction:row-reverse;">
+              <div class="avatar" style="width:28px;height:28px;font-size:10px;flex-shrink:0;background:var(--primary);"><%= (user.name || 'A').charAt(0) %></div>
+              <div style="text-align:right;">
+                <div class="text-xs text-secondary" style="margin-bottom:2px;">You • 2:32 PM</div>
+                <div style="background:var(--primary);color:white;padding:10px 14px;border-radius:12px 0 12px 12px;font-size:14px;max-width:400px;">
+                  I think we should use Node.js for the backend and Flutter for mobile. What do you think?
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <div class="avatar" style="width:28px;height:28px;font-size:10px;flex-shrink:0;background:#14B8A6;">M</div>
+              <div>
+                <div class="text-xs text-secondary" style="margin-bottom:2px;">Mike • 2:35 PM</div>
+                <div style="background:var(--background);padding:10px 14px;border-radius:0 12px 12px 12px;font-size:14px;max-width:400px;">
+                  Sounds great! I can handle the Firebase integration. 🔥
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <input type="text" class="form-input" placeholder="Type a message..." id="chatInput" style="border-radius:24px;">
+            <button class="btn btn-primary" style="border-radius:50%;width:44px;height:44px;padding:0;" onclick="sendMessage()">
+              <span class="material-icons-round" style="font-size:20px;">send</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;gap:8px;margin-bottom:16px;flex-direction:row-reverse;';
+    div.innerHTML = `
+      <div class="avatar" style="width:28px;height:28px;font-size:10px;flex-shrink:0;background:var(--primary);"><%= (user.name || 'A').charAt(0) %></div>
+      <div style="text-align:right;">
+        <div class="text-xs text-secondary" style="margin-bottom:2px;">You • Just now</div>
+        <div style="background:var(--primary);color:white;padding:10px 14px;border-radius:12px 0 12px 12px;font-size:14px;max-width:400px;">${msg}</div>
+      </div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    input.value = '';
+  }
+
+  document.getElementById('chatInput')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendMessage();
+  });
+</script>
+
+<%- include('../partials/footer') %>

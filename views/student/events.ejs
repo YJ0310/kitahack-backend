@@ -1,0 +1,153 @@
+<%- include('../partials/head') %>
+
+<%- include('../partials/sidebar_student') %>
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<div class="app-layout">
+  <div class="main-content">
+    <div class="mobile-header">
+      <button class="hamburger-btn" onclick="toggleSidebar()">
+        <span class="material-icons-round">menu</span>
+      </button>
+      <div class="logo-area">
+        <span style="font-size:24px">🍵</span>
+        <span class="font-bold">Events</span>
+      </div>
+      <button class="theme-pill" onclick="toggleTheme()">
+        <span class="theme-icon">☀️</span>
+      </button>
+    </div>
+
+    <%- include('../partials/topbar', { shell: 'student' }) %>
+
+    <div class="page-content">
+      <div class="section-header mb-6">
+        <h2>Events</h2>
+        <div class="flex gap-3">
+          <div class="search-box" style="width:300px;">
+            <span class="search-icon material-icons-round">search</span>
+            <input type="text" class="form-input" placeholder="Search events..." id="eventSearch">
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommended -->
+      <div class="section">
+        <h3 class="section-title mb-4">
+          <span class="material-icons-round" style="vertical-align:middle;margin-right:8px;color:var(--accent-purple);">recommend</span>
+          Recommended For You
+        </h3>
+        <div class="grid-3" id="recommendedEvents">
+          <% events.slice(0, 3).forEach(event => { %>
+            <div class="event-card" data-event>
+              <div class="event-date">
+                <span class="material-icons-round" style="font-size:14px">schedule</span>
+                <% if (event.date && event.date._seconds) { %>
+                  <%= new Date(event.date._seconds * 1000).toLocaleDateString('en-MY', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                <% } else { %>
+                  TBD
+                <% } %>
+              </div>
+              <div class="event-title"><%= event.event_title || 'Untitled Event' %></div>
+              <div class="event-location">
+                <span class="material-icons-round" style="font-size:14px">location_on</span>
+                <%= event.location || 'Online' %>
+              </div>
+              <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+                <% if (event.is_all_majors) { %>
+                  <span class="chip chip-green">All Majors</span>
+                <% } else { %>
+                  <span class="chip">Targeted</span>
+                <% } %>
+                <% if (event.is_official) { %>
+                  <span class="chip chip-blue">Official</span>
+                <% } %>
+              </div>
+              <div style="margin-top:16px;display:flex;gap:8px;">
+                <button class="btn btn-primary btn-sm">Join Event</button>
+                <button class="btn btn-ghost btn-sm">Details</button>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- All Events -->
+      <div class="section">
+        <h3 class="section-title mb-4">
+          <span class="material-icons-round" style="vertical-align:middle;margin-right:8px;color:var(--accent-orange);">explore</span>
+          Explore All Events
+        </h3>
+        <div class="grid-3" id="allEvents">
+          <% events.forEach(event => { %>
+            <div class="event-card" data-event data-title="<%= (event.title || '').toLowerCase() %>">
+              <div class="event-date">
+                <span class="material-icons-round" style="font-size:14px">schedule</span>
+                <%= event.formattedDate || 'TBD' %>
+              </div>
+              <div class="event-title"><%= event.title || 'Untitled Event' %></div>
+              <% if (event.organizer) { %>
+              <div style="font-size:12px;color:var(--text-secondary);margin:4px 0;">
+                <span class="material-icons-round" style="font-size:13px;vertical-align:middle">business</span>
+                <%= event.organizer %>
+              </div>
+              <% } %>
+              <div class="event-location">
+                <span class="material-icons-round" style="font-size:14px">location_on</span>
+                <%= event.location || 'Online' %>
+              </div>
+              <% if (event.description) { %>
+              <div style="font-size:13px;color:var(--text-secondary);margin:8px 0;line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;">
+                <%= event.description %>
+              </div>
+              <% } %>
+              <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+                <% if (event.type) { %>
+                  <span class="chip chip-purple"><%= event.type %></span>
+                <% } %>
+                <% if (event.is_all_majors) { %>
+                  <span class="chip chip-green">All Majors</span>
+                <% } else { %>
+                  <span class="chip">Targeted</span>
+                <% } %>
+                <% if (event.is_official) { %>
+                  <span class="chip chip-blue">Official</span>
+                <% } %>
+              </div>
+              <div style="margin-top:16px;display:flex;gap:8px;">
+                <% if (event.action_links && event.action_links.register_url) { %>
+                  <a href="<%= event.action_links.register_url %>" target="_blank" class="btn btn-primary btn-sm">Register</a>
+                <% } else { %>
+                  <button class="btn btn-primary btn-sm" disabled>Register</button>
+                <% } %>
+                <% if (event.action_links && event.action_links.whatsapp_url) { %>
+                  <a href="<%= event.action_links.whatsapp_url %>" target="_blank" class="btn btn-ghost btn-sm">WhatsApp</a>
+                <% } %>
+              </div>
+            </div>
+          <% }); %>
+          <% if (events.length === 0) { %>
+            <div class="empty-state" style="grid-column:1/-1;">
+              <div class="icon">📅</div>
+              <h3>No events available</h3>
+              <p>Check back soon for new events.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Client-side event search filter
+  document.getElementById('eventSearch')?.addEventListener('input', function(e) {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('#allEvents [data-event]').forEach(card => {
+      const title = card.getAttribute('data-title') || '';
+      card.style.display = title.includes(q) ? '' : 'none';
+    });
+  });
+</script>
+
+<%- include('../partials/footer') %>

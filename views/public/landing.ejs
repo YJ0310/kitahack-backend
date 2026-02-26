@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= typeof theme !== 'undefined' ? theme : 'dark' %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <div class="landing-hero">
+    <h1>🍵 Teh Ais</h1>
+    <p class="subtitle">
+      Connect. Collaborate. Conquer.<br>
+      The cross-disciplinary talent platform for Malaysian universities.
+    </p>
+    <div class="landing-actions">
+      <a href="/login" class="btn btn-primary btn-lg">Get Started</a>
+      <a href="#features" class="btn btn-secondary btn-lg">Learn More</a>
+    </div>
+  </div>
+
+  <div class="landing-features" id="features">
+    <div class="text-center">
+      <h2>Why Teh Ais?</h2>
+      <p class="text-secondary mt-4" style="max-width:600px;margin:16px auto 0;">
+        Built for students, schools, and enterprises. Find your perfect team, discover events, and unlock career opportunities.
+      </p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(168,85,247,0.1);color:#A855F7;">
+          <span class="material-icons-round">smart_toy</span>
+        </div>
+        <h3>AI-Powered Matching</h3>
+        <p>Our AI analyses your skills and interests to recommend the perfect team members, events, and opportunities.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(236,72,153,0.1);color:#EC4899;">
+          <span class="material-icons-round">groups</span>
+        </div>
+        <h3>Team Formation</h3>
+        <p>Decentralized auto-pairing helps you find teammates for hackathons. No owner needed — just collaborate.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(249,115,22,0.1);color:#F97316;">
+          <span class="material-icons-round">calendar_month</span>
+        </div>
+        <h3>Event Discovery</h3>
+        <p>Browse hackathons, workshops, and competitions from across Malaysia. Register with one click.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(20,184,166,0.1);color:#14B8A6;">
+          <span class="material-icons-round">work</span>
+        </div>
+        <h3>Enterprise Recruiting</h3>
+        <p>Companies search for talent using NLP queries. Your skill tags become your digital resume.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(59,130,246,0.1);color:#3B82F6;">
+          <span class="material-icons-round">school</span>
+        </div>
+        <h3>School Analytics</h3>
+        <p>Universities track skill trends across faculties and manage events, internship partnerships, and more.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(140,85,53,0.1);color:#8C5535;">
+          <span class="material-icons-round">sell</span>
+        </div>
+        <h3>Smart Tags</h3>
+        <p>Centralized tag system with auto-complete. Build your profile with 1000+ recognized skills.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:48px 24px;text-align:center;background:var(--surface);border-top:1px solid var(--border);">
+    <h2>Ready to dive in?</h2>
+    <p class="text-secondary mt-4 mb-6">Choose your portal and start exploring.</p>
+    <div class="landing-actions">
+      <a href="/demo-login/student" class="btn btn-primary">🎓 Student Portal</a>
+      <a href="/demo-login/school" class="btn btn-secondary" style="border-color:#009688;color:#009688;">🏫 School Portal</a>
+      <a href="/demo-login/enterprise" class="btn btn-secondary" style="border-color:#9C27B0;color:#9C27B0;">🏢 Enterprise Portal</a>
+    </div>
+  </div>
+
+  <footer style="padding:24px;text-align:center;font-size:13px;color:var(--text-secondary);">
+    © 2026 Teh Ais — Kitahack. Built with ❤️ in Malaysia.
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

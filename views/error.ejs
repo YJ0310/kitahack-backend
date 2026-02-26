@@ -1,0 +1,18 @@
+<%- include('partials/head') %>
+
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
+  <div class="card" style="max-width:480px;width:100%;text-align:center;">
+    <span class="material-icons-round" style="font-size:64px;color:var(--primary);display:block;margin-bottom:16px;">error_outline</span>
+    <h1 style="font-size:24px;margin-bottom:8px;">Oops! Something went wrong</h1>
+    <p class="text-secondary mb-4"><%= message || 'An unexpected error occurred.' %></p>
+    <% if (typeof error !== 'undefined' && error && error.status) { %>
+      <div class="text-sm text-secondary mb-4">Error <%= error.status %></div>
+    <% } %>
+    <a href="/" class="btn btn-primary">
+      <span class="material-icons-round" style="font-size:18px;margin-right:6px;">home</span>
+      Back to Home
+    </a>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
