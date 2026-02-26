@@ -1,0 +1,46 @@
+# ─── Firebase App Hosting configuration for kitahack-tehais backend ─────────
+# Docs: https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  runtime: nodejs22
+  minInstances: 0
+  maxInstances: 3
+  concurrency: 100
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: NODE_ENV
+    value: production
+    availability:
+      - RUNTIME
+
+  - variable: GCP_PROJECT_ID
+    value: kitahack-tehais
+    availability:
+      - RUNTIME
+
+  - variable: GCP_LOCATION
+    value: us-central1
+    availability:
+      - RUNTIME
+
+  - variable: GEMINI_MODEL
+    value: gemini-3.1-pro
+    availability:
+      - RUNTIME
+
+  - variable: FIREBASE_STORAGE_BUCKET
+    value: kitahack-tehais.firebasestorage.app
+    availability:
+      - RUNTIME
+
+  - variable: FRONTEND_URL
+    value: https://kitahack-tehais.web.app
+    availability:
+      - RUNTIME
+
+  - variable: PRODUCTION_URL
+    value: https://kitahack-tehais.web.app
+    availability:
+      - RUNTIME
