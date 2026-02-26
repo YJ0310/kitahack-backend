@@ -37,7 +37,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: [
     process.env.FRONTEND_URL    || 'http://localhost:8080',
-    process.env.PRODUCTION_URL  || 'https://kitahack-tehais.web.app',
+    process.env.PRODUCTION_URL  || 'https://kitahack-app--kitahack-tehais.us-central1.hosted.app',
+    'https://kitahack-app--kitahack-tehais.us-central1.hosted.app',
     'https://kitahack-tehais.web.app',
     'https://kitahack-tehais.firebaseapp.com',
     'http://localhost:3000',

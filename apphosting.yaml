@@ -36,11 +36,11 @@ env:
       - RUNTIME
 
   - variable: FRONTEND_URL
-    value: https://kitahack-tehais.web.app
+    value: https://kitahack-app--kitahack-tehais.us-central1.hosted.app
     availability:
       - RUNTIME
 
   - variable: PRODUCTION_URL
-    value: https://kitahack-tehais.web.app
+    value: https://kitahack-app--kitahack-tehais.us-central1.hosted.app
     availability:
       - RUNTIME
