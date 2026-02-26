@@ -1,0 +1,5 @@
+storage:https://console.firebase.google.com/project/kitahack-tehais/storage/kitahack-tehais.firebasestorage.app/files
+authentication
+project:kitahack-tehais
+sdk:flw the file i provide
+then: host both fullstack as main app for the project (either as app hosting or the main app)
