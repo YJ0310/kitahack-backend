@@ -190,7 +190,7 @@ app.listen(PORT, () => {
   console.log('  Teh Ais Backend running on http://localhost:' + PORT);
   console.log('  API docs at http://localhost:' + PORT + '/api');
   console.log('  Health check at http://localhost:' + PORT + '/api/health');
-  console.log('  Vertex AI model: ' + (process.env.GEMINI_MODEL || 'gemini-3.1-pro'));
+  console.log('  Vertex AI model: ' + (process.env.GEMINI_MODEL || 'gemini-2.5-flash'));
   console.log('');
 });
 

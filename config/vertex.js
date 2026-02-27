@@ -3,7 +3,7 @@ const { VertexAI } = require('@google-cloud/vertexai');
 
 const PROJECT_ID = process.env.GCP_PROJECT_ID || 'kitahack-tehais';
 const LOCATION   = process.env.GCP_LOCATION   || 'us-central1';
-const MODEL_ID   = process.env.GEMINI_MODEL    || 'gemini-2.5-pro';
+const MODEL_ID   = process.env.GEMINI_MODEL    || 'gemini-2.5-flash';
 
 const vertexAI = new VertexAI({ project: PROJECT_ID, location: LOCATION });
 

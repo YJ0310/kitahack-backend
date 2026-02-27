@@ -31,7 +31,7 @@ router.get('/post/:postId', authMiddleware, async (req, res, next) => {
 // POST /api/matches/find-candidates — AI find matching candidates for a post
 router.post('/find-candidates', authMiddleware, async (req, res, next) => {
   try {
-    const { post_id } = req.body;
+    const post_id = req.body.post_id || req.body.postId;
     if (!post_id) return res.status(400).json({ error: 'post_id is required' });
 
     const post = await postsService.getPostById(post_id);
@@ -67,7 +67,8 @@ router.post('/find-candidates', authMiddleware, async (req, res, next) => {
 // POST /api/matches/apply — Organic application to a post
 router.post('/apply', authMiddleware, async (req, res, next) => {
   try {
-    const { post_id, message } = req.body;
+    const post_id = req.body.post_id || req.body.postId;
+    const message = req.body.message;
     if (!post_id) return res.status(400).json({ error: 'post_id is required' });
 
     const match = await matchesService.createMatch({
@@ -142,9 +143,16 @@ router.post('/smart-search', authMiddleware, async (req, res, next) => {
     const allUsers = await usersService.getAllUsers();
     const allTags = await tagsService.getAllTags();
 
-    const results = await aiService.smartSearchCandidates(query, allUsers, allTags);
+    let results = [];
+    try {
+      const aiResults = await aiService.smartSearchCandidates(query, allUsers, allTags);
+      results = Array.isArray(aiResults) ? aiResults : (aiResults.candidates || []);
+    } catch (aiErr) {
+      console.error('[smart-search] AI service error:', aiErr.message);
+      // Return empty results instead of crashing
+    }
 
-    res.json({ results: Array.isArray(results) ? results : [] });
+    res.json({ results });
   } catch (err) { next(err); }
 });
 

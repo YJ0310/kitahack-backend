@@ -155,13 +155,16 @@ Be creative with the reason — make it feel like a personal AI invitation. Retu
 // ─────────────────────────────────────────────────────────────────────────────
 async function smartSearchCandidates(query, candidates, tags) {
   const tagMap = {};
-  tags.forEach(t => { tagMap[t.id] = t.name; });
+  (tags || []).forEach(t => { tagMap[t.id] = t.name; });
 
-  const candidateSummaries = candidates.map(c => {
-    const skills = (c.skill_tags || []).map(s => tagMap[s.tag_id] || `Tag#${s.tag_id}`);
+  const candidateSummaries = (candidates || []).map(c => {
+    const skills = (c.skill_tags || []).map(s => {
+      const tagId = typeof s === 'object' ? s.tag_id : s;
+      return tagMap[tagId] || `Tag#${tagId}`;
+    });
     const devs = (c.dev_tags || []).map(id => tagMap[id] || `Tag#${id}`);
     const courses = (c.courses_id || []).map(id => tagMap[id] || `Tag#${id}`);
-    return `UID:${c.uid} Name:"${c.name}" Skills:[${skills.join(',')}] DevAreas:[${devs.join(',')}] Courses:[${courses.join(',')}] Major:${tagMap[c.major_id] || 'Unknown'}`;
+    return `UID:${c.uid || 'unknown'} Name:"${c.name || 'Unknown'}" Skills:[${skills.join(',')}] DevAreas:[${devs.join(',')}] Courses:[${courses.join(',')}] Major:${tagMap[c.major_id] || 'Unknown'}`;
   }).join('\n');
 
   const prompt = `You are the AI search engine for "Teh Ais", a university talent matching platform.
