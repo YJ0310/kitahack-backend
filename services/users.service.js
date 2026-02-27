@@ -18,27 +18,42 @@ async function upsertUser(uid, data) {
   const ref = db.collection(COLLECTION).doc(uid);
   const existing = await ref.get();
 
-  const userData = {
-    uid,
-    name: data.name || '',
-    role: data.role || 'Student',
-    major_id: data.major_id ?? null,
-    courses_id: data.courses_id || [],
-    skill_tags: data.skill_tags || [],
-    dev_tags: data.dev_tags || [],
-    matric_no: data.matric_no || '',
-    email: data.email || '',
-    whatsapp_num: data.whatsapp_num || '',
-    portfolio_url: data.portfolio_url || '',
-  };
-
   if (existing.exists) {
-    await ref.update(userData);
+    // Merge: only update fields that are explicitly provided,
+    // so existing tags / major / courses are preserved.
+    const updates = { uid };
+    if (data.name !== undefined)          updates.name = data.name;
+    if (data.role !== undefined)          updates.role = data.role;
+    if (data.email !== undefined)         updates.email = data.email;
+    if (data.major_id !== undefined)      updates.major_id = data.major_id;
+    if (data.courses_id !== undefined)    updates.courses_id = data.courses_id;
+    if (data.skill_tags !== undefined)    updates.skill_tags = data.skill_tags;
+    if (data.dev_tags !== undefined)      updates.dev_tags = data.dev_tags;
+    if (data.matric_no !== undefined)     updates.matric_no = data.matric_no;
+    if (data.whatsapp_num !== undefined)  updates.whatsapp_num = data.whatsapp_num;
+    if (data.portfolio_url !== undefined) updates.portfolio_url = data.portfolio_url;
+    if (data.photo_url !== undefined)     updates.photo_url = data.photo_url;
+    await ref.update(updates);
+    const fresh = await ref.get();
+    return { uid, ...fresh.data() };
   } else {
+    // New user: set all fields with defaults
+    const userData = {
+      uid,
+      name: data.name || '',
+      role: data.role || 'Student',
+      major_id: data.major_id ?? null,
+      courses_id: data.courses_id || [],
+      skill_tags: data.skill_tags || [],
+      dev_tags: data.dev_tags || [],
+      matric_no: data.matric_no || '',
+      email: data.email || '',
+      whatsapp_num: data.whatsapp_num || '',
+      portfolio_url: data.portfolio_url || '',
+    };
     await ref.set(userData);
+    return userData;
   }
-
-  return userData;
 }
 
 /**
