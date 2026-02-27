@@ -27,6 +27,10 @@ const storageRoutes  = require('./routes/storage.routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy — required for Cloud Run / Firebase App Hosting behind load balancer
+// Fixes express-rate-limit X-Forwarded-For validation error
+app.set('trust proxy', true);
+
 // ─── Global Middleware ───────────────────────────────────────────────────────
 // Disable CSP entirely — Flutter Web (WASM) + Google Fonts + Firebase Auth
 // all require very permissive policies; helmet's default CSP breaks them.
