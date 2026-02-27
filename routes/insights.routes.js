@@ -17,14 +17,92 @@ router.get('/', authMiddleware, async (req, res, next) => {
     const user = await usersService.getUserByUid(req.uid);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const recentMatches = await matchesService.getMatchesByCandidate(req.uid);
-    const events = await eventsService.getAllEvents();
-    const allTags = await tagsService.getAllTags();
+    const [recentMatches, events, allTags, openPosts] = await Promise.all([
+      matchesService.getMatchesByCandidate(req.uid),
+      eventsService.getAllEvents(),
+      tagsService.getAllTags(),
+      postsService.getOpenPosts(),
+    ]);
 
-    const insights = await aiService.generateInsights(user, recentMatches, events, allTags);
+    const insights = await aiService.generateInsights(user, recentMatches, events, allTags, openPosts);
 
     res.json({ insights: Array.isArray(insights) ? insights : [] });
   } catch (err) { next(err); }
+});
+
+// POST /api/insights/execute-action — Execute an AI-generated insight action
+router.post('/execute-action', authMiddleware, async (req, res, next) => {
+  try {
+    const { action_type, action_data } = req.body;
+    if (!action_type) return res.status(400).json({ error: 'action_type is required' });
+
+    const user = await usersService.getUserByUid(req.uid);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    switch (action_type) {
+      case 'join_event': {
+        if (!action_data?.event_id) return res.status(400).json({ error: 'event_id required' });
+        const match = await eventMatchesService.createEventMatch({
+          event_id: action_data.event_id,
+          user_id: req.uid,
+          match_type: 'AI_Insight',
+          score: 95,
+          status: 'Joined',
+          ai_reason: action_data.reason || 'Joined via AI insight action',
+        });
+        return res.json({ executed: true, action: 'join_event', description: 'Successfully joined the event!', data: match });
+      }
+
+      case 'apply_to_post': {
+        if (!action_data?.post_id) return res.status(400).json({ error: 'post_id required' });
+        const match = await matchesService.createMatch({
+          post_id: action_data.post_id,
+          candidate_id: req.uid,
+          match_type: 'AI_Insight',
+          score: 90,
+          status: 'Pending',
+          ai_reason: action_data.message || 'Applied via AI insight action',
+        });
+        return res.json({ executed: true, action: 'apply_to_post', description: 'Application submitted!', data: match });
+      }
+
+      case 'accept_match': {
+        if (!action_data?.match_id) return res.status(400).json({ error: 'match_id required' });
+        const updated = await matchesService.updateMatchStatus(action_data.match_id, 'Accepted');
+        return res.json({ executed: true, action: 'accept_match', description: 'Match accepted!', data: updated });
+      }
+
+      case 'add_tags': {
+        const fields = {};
+        if (action_data?.skill_tags) {
+          const existing = user.skill_tags || [];
+          const existingIds = new Set(existing.map(s => s.tag_id));
+          const newTags = action_data.skill_tags.filter(s => !existingIds.has(s.tag_id));
+          fields.skill_tags = [...existing, ...newTags];
+        }
+        if (action_data?.dev_tags) {
+          const existing = user.dev_tags || [];
+          fields.dev_tags = [...new Set([...existing, ...action_data.dev_tags])];
+        }
+        if (action_data?.courses_id) {
+          const existing = user.courses_id || [];
+          fields.courses_id = [...new Set([...existing, ...action_data.courses_id])];
+        }
+        const updated = await usersService.updateUserFields(req.uid, fields);
+        return res.json({ executed: true, action: 'add_tags', description: 'Tags updated!', data: updated });
+      }
+
+      case 'navigate': {
+        return res.json({ executed: true, action: 'navigate', description: 'Navigating...', data: { path: action_data?.path || '/student' } });
+      }
+
+      default:
+        return res.json({ executed: false, action: action_type, description: 'Unknown action type' });
+    }
+  } catch (err) {
+    console.error('execute-action error:', err);
+    res.status(500).json({ error: err.message, executed: false });
+  }
 });
 
 // POST /api/insights/ai-command — Execute a high-permission AI command on behalf of the user

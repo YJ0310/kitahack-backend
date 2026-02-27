@@ -233,45 +233,73 @@ Return ONLY valid JSON.`;
 // 7. AI DASHBOARD INSIGHTS
 //    Generate personalized insights/notifications for a student.
 // ─────────────────────────────────────────────────────────────────────────────
-async function generateInsights(user, recentMatches, recentEvents, tags) {
+async function generateInsights(user, recentMatches, recentEvents, tags, openPosts) {
   const tagMap = {};
   tags.forEach(t => { tagMap[t.id] = t.name; });
 
   const userSkills = (user.skill_tags || []).map(s => tagMap[s.tag_id] || `Tag#${s.tag_id}`);
+  const userDevs  = (user.dev_tags || []).map(id => tagMap[id] || `Tag#${id}`);
 
   const matchInfo = recentMatches.slice(0, 5).map(m =>
-    `Match for post ${m.post_id}: status=${m.match_status}, score=${m.score}`
+    `MatchID:${m.match_id || m.id} PostID:${m.post_id} Status:${m.match_status} Score:${m.score}`
   ).join('\n');
 
-  const eventInfo = recentEvents.slice(0, 5).map(e =>
-    `Event "${e.title}" (${e.type}) on ${e.event_date}`
+  const eventInfo = recentEvents.slice(0, 10).map(e =>
+    `EventID:${e.event_id} Title:"${e.title}" Type:${e.type} Date:${e.event_date || 'TBD'}`
   ).join('\n');
 
-  const prompt = `You are the AI insights engine for "Teh Ais", a university collaboration platform.
+  const postInfo = (openPosts || []).slice(0, 10).map(p => {
+    const skills = (p.required_skills || []).join(', ');
+    return `PostID:${p.post_id} Title:"${p.title}" Skills:[${skills}] Owner:${p.owner_id}`;
+  }).join('\n');
 
-Student: ${user.name}
+  const prompt = `You are JARVIS — the AI agent engine for "Teh Ais", a university collaboration platform.
+You are generating ACTIONABLE insight cards for the student dashboard. Each insight MUST include one executable action the student can take with a single button click.
+
+Student: ${user.name} (UID: ${user.uid})
+Faculty: ${user.faculty || 'Not set'}
 Skills: [${userSkills.join(', ')}]
+Dev Areas: [${userDevs.join(', ')}]
 
 Recent match activity:
 ${matchInfo || 'No recent matches'}
 
-Upcoming relevant events:
-${eventInfo || 'No upcoming events'}
+Available events (with IDs):
+${eventInfo || 'No events'}
 
-Generate 3-4 personalized, actionable AI insight cards for this student's dashboard.
+Open team posts looking for members (with IDs):
+${postInfo || 'No open posts'}
+
+Available tag IDs in the system (subset):
+${tags.slice(0, 50).map(t => `${t.id}:"${t.name}"`).join(', ')}
+
+Generate 3-4 personalized, actionable AI insight cards. EACH card MUST have an action_type and action_data so the frontend can execute it with one click.
+
+Available action_types:
+- "join_event" — Register user for an event. action_data: { "event_id": "<real event ID from above>" }
+- "apply_to_post" — Apply to a team post. action_data: { "post_id": "<real post ID from above>", "message": "<short application msg>" }
+- "add_tags" — Add skills/dev tags to profile. action_data: { "skill_tags": [{"tag_id": <int>, "confidence": 0.9}], "dev_tags": [<int>] }
+- "navigate" — Direct user to a page. action_data: { "path": "/student/profile|/student/event|/student/team|/student/chat" }
+- "accept_match" — Accept a pending match. action_data: { "match_id": "<real match ID from above>" }
 
 Return a JSON array:
 [
   {
-    "title": "<short title, 3-5 words>",
-    "content": "<1-2 sentence insight>",
+    "title": "<short catchy title, 3-6 words>",
+    "content": "<1-2 sentence personalized insight explaining WHY>",
     "type": "team_request|event_alert|enterprise_match|skill_tip|connection",
-    "priority": "<high|medium|low>",
-    "action_text": "<button label like 'Accept', 'Join', 'View'>"
+    "priority": "high|medium|low",
+    "action_text": "<verb button label e.g. 'Join Now', 'Apply', 'Add Skills', 'View'>",
+    "action_type": "<one of the action_types above>",
+    "action_data": { ... }
   }
 ]
 
-Be specific, personalized, and helpful. Return ONLY valid JSON array.`;
+IMPORTANT:
+- Use REAL event_id / post_id / match_id values from the data above — never make up IDs.
+- action_text should be a short verb phrase (2-3 words max).
+- Be specific and personalized based on the student's skills and activity.
+- Return ONLY valid JSON array.`;
 
   return geminiGenerateJSON(prompt);
 }
