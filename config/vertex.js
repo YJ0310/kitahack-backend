@@ -25,14 +25,29 @@ const generativeModel = vertexAI.getGenerativeModel({
 
 /**
  * Send a prompt to Gemini and get a text response.
+ * Includes retry with exponential backoff for 429 rate-limit errors.
  * @param {string} prompt
+ * @param {number} maxRetries
  * @returns {Promise<string>}
  */
-async function geminiGenerate(prompt) {
+async function geminiGenerate(prompt, maxRetries = 3) {
   const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
-  const result = await generativeModel.generateContent(request);
-  const response = result.response;
-  return response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await generativeModel.generateContent(request);
+      const response = result.response;
+      return response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } catch (err) {
+      const is429 = err?.message?.includes('429') || err?.status === 429 || err?.code === 429;
+      if (is429 && attempt < maxRetries) {
+        const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
+        console.warn(`[Vertex AI] 429 rate-limit, retrying in ${Math.round(delay)}ms (attempt ${attempt + 1}/${maxRetries})`);
+        await new Promise(r => setTimeout(r, delay));
+      } else {
+        throw err;
+      }
+    }
+  }
 }
 
 /**
