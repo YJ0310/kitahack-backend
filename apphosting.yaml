@@ -26,7 +26,7 @@ env:
       - RUNTIME
 
   - variable: GEMINI_MODEL
-    value: gemini-3.1-pro
+    value: gemini-2.0-flash
     availability:
       - RUNTIME
 

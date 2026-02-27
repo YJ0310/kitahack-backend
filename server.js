@@ -67,6 +67,8 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.' },
+  // Disable the strict trust-proxy validation so it works both locally and behind Cloud Run proxy
+  validate: { trustProxy: false, xForwardedForHeader: false },
 });
 app.use('/api/', limiter);
 
@@ -86,7 +88,7 @@ app.get('/api/health', (req, res) => {
     status: 'ok',
     service: 'kitahack-tehais-backend',
     timestamp: new Date().toISOString(),
-    vertex_model: process.env.GEMINI_MODEL || 'gemini-3.1-pro',
+    vertex_model: require('./config/vertex').MODEL_ID,
   });
 });
 
