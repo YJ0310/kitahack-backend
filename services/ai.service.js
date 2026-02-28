@@ -386,6 +386,53 @@ Return ONLY valid JSON.`;
   return geminiGenerateJSON(prompt);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. GENERATE RESUME FROM USER PROFILE
+//     Creates a professional resume/CV based on the user's profile data,
+//     skills, courses, major, and development interests.
+// ─────────────────────────────────────────────────────────────────────────────
+async function generateResume(user, tagNames) {
+  const tagMap = {};
+  if (tagNames) {
+    Object.entries(tagNames).forEach(([id, name]) => { tagMap[id] = name; });
+  }
+
+  const majorName = user.major_id ? (tagMap[user.major_id] || `Major #${user.major_id}`) : 'Not specified';
+  const courseNames = (user.courses_id || []).map(id => tagMap[id] || `Course #${id}`);
+  const skillList = (user.skill_tags || []).map(s => {
+    const name = tagMap[s.tag_id] || `Skill #${s.tag_id}`;
+    return s.is_confirmed ? `${name} (verified)` : `${name} (learning)`;
+  });
+  const devAreas = (user.dev_tags || []).map(id => tagMap[id] || `Area #${id}`);
+
+  const prompt = `You are a professional resume/CV writer. Generate a polished, professional resume in clean Markdown format for a university student based on their profile data.
+
+Student Profile:
+- Name: ${user.name || 'Student'}
+- Email: ${user.email || 'N/A'}
+- Matric No: ${user.matric_no || 'N/A'}
+- WhatsApp: ${user.whatsapp_num || 'N/A'}
+- Portfolio/LinkedIn: ${user.portfolio_url || 'N/A'}
+- Major: ${majorName}
+- Courses: ${courseNames.join(', ') || 'None listed'}
+- Skills: ${skillList.join(', ') || 'None listed'}
+- Development Interests: ${devAreas.join(', ') || 'None listed'}
+- Role: ${user.role || 'Student'}
+
+Generate a professional resume with the following sections:
+1. **Header** — Name, contact info (email, phone, LinkedIn/portfolio)
+2. **Professional Summary** — A compelling 2-3 sentence summary highlighting their strengths
+3. **Education** — University of Malaya, major, relevant coursework
+4. **Skills** — Categorized into Technical Skills and Soft Skills
+5. **Development Interests** — Areas they're passionate about
+6. **Projects** — Generate 2-3 realistic project descriptions based on their skills and interests (make them sound impressive but plausible for a university student)
+7. **Extracurricular Activities** — Generate 1-2 activities relevant to their field
+
+Use clean Markdown formatting. Make it professional and impressive. Do NOT wrap the output in code fences. Return the resume text directly.`;
+
+  return geminiGenerate(prompt);
+}
+
 module.exports = {
   autoTagUser,
   autoTagPost,
@@ -396,4 +443,5 @@ module.exports = {
   generateInsights,
   searchEventsByPrompt,
   autoPairTeams,
+  generateResume,
 };

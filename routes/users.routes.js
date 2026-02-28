@@ -78,4 +78,24 @@ router.post('/apply-tags', authMiddleware, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// POST /api/users/generate-resume — AI-generated resume from profile data
+router.post('/generate-resume', authMiddleware, async (req, res, next) => {
+  try {
+    const user = await usersService.getUserByUid(req.uid);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Resolve tag names for richer context
+    const allTagIds = [
+      ...(user.courses_id || []),
+      ...(user.dev_tags || []),
+      ...(user.skill_tags || []).map(s => s.tag_id),
+      ...(user.major_id ? [user.major_id] : []),
+    ];
+    const tagNames = await tagsService.resolveTagNames(allTagIds);
+
+    const resume = await aiService.generateResume(user, tagNames);
+    res.json({ resume });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
