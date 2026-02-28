@@ -5,7 +5,11 @@
 
 ## 🔗 Prototype Access
 
+<<<<<<< Updated upstream
 **Live Demo:** [https://kitahack-tehais.web.app](https://kitahack-tehais.web.app)
+=======
+**Live Demo:** [https://kitahack-app--kitahack-tehais.us-central1.hosted.app/](https://kitahack-app--kitahack-tehais.us-central1.hosted.app/)
+>>>>>>> Stashed changes
 
 **API Health Check:** [https://kitahack-app--kitahack-tehais.us-central1.hosted.app/api/health](https://kitahack-app--kitahack-tehais.us-central1.hosted.app/api/health)
 
