@@ -5,11 +5,7 @@
 
 ## 🔗 Prototype Access
 
-<<<<<<< Updated upstream
-**Live Demo:** [https://kitahack-tehais.web.app](https://kitahack-tehais.web.app)
-=======
 **Live Demo:** [https://kitahack-app--kitahack-tehais.us-central1.hosted.app/](https://kitahack-app--kitahack-tehais.us-central1.hosted.app/)
->>>>>>> Stashed changes
 
 **API Health Check:** [https://kitahack-app--kitahack-tehais.us-central1.hosted.app/api/health](https://kitahack-app--kitahack-tehais.us-central1.hosted.app/api/health)
 
@@ -223,31 +219,31 @@ jsonModel: {
 
 ---
 
-## 🗺️ Future Roadmap
+## 🗺️ Future Roadmap (by 28 March — Final Round)
 
-### Phase 1 — Enhanced Matching (Q2 2026)
-- [ ] Real-time collaborative filtering (learn from accepted/rejected matches)
-- [ ] Multi-round team building (form complete teams, not just pairs)
-- [ ] Skill verification via micro-assessments
-- [ ] Match explanation transparency (show why AI recommended each candidate)
+### Week 1 (1–7 Mar) — Reliability & Edge Cases
+- [ ] Stress test AIDB Manager with full 10K user dataset under concurrent load
+- [ ] Add retry logic and graceful degradation for all AI endpoints
+- [ ] Fix edge cases in temp chat expiration and match status transitions
+- [ ] Improve JSON response validation with schema-level checks
 
-### Phase 2 — University Ecosystem (Q3 2026)
-- [ ] Multi-university federation (connect students across Malaysian universities)
-- [ ] Official university API integration (auto-sync courses, grades, clubs)
-- [ ] Enterprise recruiter portal with talent pipeline management
-- [ ] Webhook-based real-time notifications (push instead of poll)
+### Week 2 (8–14 Mar) — AI Accuracy & Smart Features
+- [ ] Fine-tune matching prompts for higher candidate relevance scores
+- [ ] Add match explanation transparency (show why AI recommended each candidate)
+- [ ] Implement multi-turn JARVIS conversations with session context
+- [ ] Add Firestore composite indexes for optimized multi-field queries
 
-### Phase 3 — AI Evolution (Q4 2026)
-- [ ] Conversational JARVIS with multi-turn memory and session context
-- [ ] AI-generated project proposals based on trending research + student strengths
-- [ ] Fine-tuned model on university collaboration data
-- [ ] Predictive analytics dashboard for university administrators
+### Week 3 (15–21 Mar) — API Expansion & Integrations
+- [ ] Complete enterprise recruiter API endpoints for candidate pipeline
+- [ ] Build school admin endpoints for event publishing and analytics
+- [ ] Add webhook-based real-time notifications for match/chat updates
+- [ ] Spectrum UM data import endpoint for auto-profile population
 
-### Phase 4 — Scale & Monetization (2027)
-- [ ] Redis/Memcached for distributed caching (replace in-memory cache)
-- [ ] Firestore composite indexes for complex multi-field queries
-- [ ] Freemium tier for enterprise recruiters
-- [ ] Regional expansion (Southeast Asia universities)
+### Week 4 (22–28 Mar) — Final Polish & Demo Prep
+- [ ] Performance optimization and Cloud Run cold-start reduction
+- [ ] Rate limiting tuning for demo scenarios (burst-friendly)
+- [ ] Comprehensive API documentation with request/response examples
+- [ ] Demo seed data refresh and presentation preparation
 
 ---
 
