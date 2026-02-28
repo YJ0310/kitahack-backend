@@ -8,6 +8,7 @@ const usersService = require('../services/users.service');
 const tagsService = require('../services/tags.service');
 const chatsService = require('../services/chats.service');
 const aiService = require('../services/ai.service');
+const aidb = require('../services/aidb.service');
 
 // GET /api/matches/mine — Get all matches for the current user
 router.get('/mine', authMiddleware, async (req, res, next) => {
@@ -37,11 +38,11 @@ router.post('/find-candidates', authMiddleware, async (req, res, next) => {
     const post = await postsService.getPostById(post_id);
     if (!post) return res.status(404).json({ error: 'Post not found' });
 
-    const allUsers = await usersService.getAllUsers();
-    const allTags = await tagsService.getAllTags();
-
-    // Filter out the post creator from candidates
-    const candidates = allUsers.filter(u => u.uid !== post.creator_id);
+    // Smart pre-filter: only fetch users with relevant skill overlap (not all 10K)
+    const [candidates, { allTags }] = await Promise.all([
+      aidb.findCandidatesForPost(post, post.creator_id, 50),
+      aidb.getTagsCached(),
+    ]);
 
     const aiResults = await aiService.matchCandidatesToPost(post, candidates, allTags);
 
@@ -125,8 +126,10 @@ router.post('/auto-pair', authMiddleware, async (req, res, next) => {
       return res.status(400).json({ error: 'user_ids array with at least 2 UIDs is required' });
     }
 
-    const users = await usersService.getUsersByUids(user_ids);
-    const allTags = await tagsService.getAllTags();
+    const [users, { allTags }] = await Promise.all([
+      aidb.getUsersByUids(user_ids),
+      aidb.getTagsCached(),
+    ]);
 
     const result = await aiService.autoPairTeams(users, team_size || 4, context || '', allTags);
 
@@ -140,12 +143,12 @@ router.post('/smart-search', authMiddleware, async (req, res, next) => {
     const { query } = req.body;
     if (!query) return res.status(400).json({ error: 'query is required' });
 
-    const allUsers = await usersService.getAllUsers();
-    const allTags = await tagsService.getAllTags();
+    // Smart pre-filter: keyword → tag matching → Firestore query (not all 10K users)
+    const { candidates: preFiltered, allTags } = await aidb.smartQueryUsers(query, req.uid, 50);
 
     let results = [];
     try {
-      const aiResults = await aiService.smartSearchCandidates(query, allUsers, allTags);
+      const aiResults = await aiService.smartSearchCandidates(query, preFiltered, allTags);
       results = Array.isArray(aiResults) ? aiResults : (aiResults.candidates || []);
     } catch (aiErr) {
       console.error('[smart-search] AI service error:', aiErr.message);

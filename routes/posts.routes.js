@@ -5,6 +5,7 @@ const { authMiddleware } = require('../middleware/auth');
 const postsService = require('../services/posts.service');
 const tagsService = require('../services/tags.service');
 const aiService = require('../services/ai.service');
+const aidb = require('../services/aidb.service');
 
 // GET /api/posts — Get all open posts
 router.get('/', authMiddleware, async (req, res, next) => {
@@ -28,7 +29,7 @@ router.get('/:id', authMiddleware, async (req, res, next) => {
     const post = await postsService.getPostById(req.params.id);
     if (!post) return res.status(404).json({ error: 'Post not found' });
 
-    const tagNames = await tagsService.resolveTagNames(post.requirements || []);
+    const tagNames = await aidb.resolveTagNamesCached(post.requirements || []);
     res.json({ post, tagNames });
   } catch (err) { next(err); }
 });
@@ -58,7 +59,7 @@ router.post('/auto-tag', authMiddleware, async (req, res, next) => {
       return res.status(400).json({ error: 'title and description are required' });
     }
 
-    const allTags = await tagsService.getAllTags();
+    const { allTags } = await aidb.getTagsCached();
     const suggestions = await aiService.autoTagPost(title, description, type || 'Other', allTags);
 
     res.json({ suggestions });
@@ -71,7 +72,7 @@ router.post('/create-from-description', authMiddleware, async (req, res, next) =
     const { description } = req.body;
     if (!description) return res.status(400).json({ error: 'description is required' });
 
-    const allTags = await tagsService.getAllTags();
+    const { allTags } = await aidb.getTagsCached();
     const generated = await aiService.createTeamFromDescription(description, allTags);
 
     // Auto-create the post if AI returned valid data

@@ -7,6 +7,7 @@ const eventMatchesService = require('../services/eventMatches.service');
 const usersService = require('../services/users.service');
 const tagsService = require('../services/tags.service');
 const aiService = require('../services/ai.service');
+const aidb = require('../services/aidb.service');
 
 // GET /api/events — Get all events (public)
 router.get('/', optionalAuth, async (req, res, next) => {
@@ -30,7 +31,7 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
     const event = await eventsService.getEventById(req.params.id);
     if (!event) return res.status(404).json({ error: 'Event not found' });
 
-    const tagNames = await tagsService.resolveTagNames(event.related_tags || []);
+    const tagNames = await aidb.resolveTagNamesCached(event.related_tags || []);
     res.json({ event, tagNames });
   } catch (err) { next(err); }
 });
@@ -60,7 +61,7 @@ router.post('/recommend', authMiddleware, async (req, res, next) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
 
     const events = await eventsService.getAllEvents();
-    const allTags = await tagsService.getAllTags();
+    const { allTags } = await aidb.getTagsCached();
 
     const recommendations = await aiService.matchUserToEvents(user, events, allTags);
 
@@ -90,7 +91,7 @@ router.post('/search', authMiddleware, async (req, res, next) => {
 
     const user = await usersService.getUserByUid(req.uid);
     const events = await eventsService.getAllEvents();
-    const allTags = await tagsService.getAllTags();
+    const { allTags } = await aidb.getTagsCached();
 
     const results = await aiService.searchEventsByPrompt(query, user, events, allTags);
 
@@ -145,22 +146,14 @@ router.post('/:id/ai-invite', authMiddleware, async (req, res, next) => {
     const event = await eventsService.getEventById(req.params.id);
     if (!event) return res.status(404).json({ error: 'Event not found' });
 
-    const allUsers = await usersService.getAllUsers();
-    const allTags = await tagsService.getAllTags();
-
-    // Use the event as context for matchUserToEvents (reverse: find users for event)
-    const tagMap = {};
-    allTags.forEach(t => { tagMap[t.id] = t.name; });
+    // Smart pre-filter: only fetch users with relevant skill overlap (not all 10K)
+    const candidates = await aidb.findUsersForEvent(event, 30);
+    const { tagMap } = await aidb.getTagsCached();
 
     const eventTags = (event.related_tags || []).map(id => tagMap[id] || `Tag#${id}`);
 
-    // Find users whose skills match event tags
-    const candidates = allUsers.filter(u => {
-      const userSkillIds = (u.skill_tags || []).map(s => String(s.tag_id));
-      const userDevIds = (u.dev_tags || []).map(id => String(id));
-      const allUserTags = [...userSkillIds, ...userDevIds];
-      return (event.related_tags || []).some(rt => allUserTags.includes(String(rt)));
-    });
+    // Find users whose skills match event tags (already pre-filtered by AIDB)
+    // No need to filter again — candidates are already relevant
 
     // Create AI invite records
     const invites = candidates.slice(0, 20).map(c => ({

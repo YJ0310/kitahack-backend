@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { optionalAuth } = require('../middleware/auth');
 const tagsService = require('../services/tags.service');
+const aidb = require('../services/aidb.service');
 
 // GET /api/tags — Get all tags (public)
 router.get('/', optionalAuth, async (req, res, next) => {
@@ -12,7 +13,8 @@ router.get('/', optionalAuth, async (req, res, next) => {
     if (category !== undefined) {
       tags = await tagsService.getTagsByCategory(category);
     } else {
-      tags = await tagsService.getAllTags();
+      const cached = await aidb.getTagsCached();
+      tags = cached.allTags;
     }
     res.json({ tags });
   } catch (err) { next(err); }
@@ -35,6 +37,7 @@ router.post('/', optionalAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'name and category_id are required' });
     }
     const tag = await tagsService.createTag({ name, category_id });
+    aidb.invalidateTagCache(); // Bust cache on new tag
     res.status(201).json({ tag });
   } catch (err) { next(err); }
 });

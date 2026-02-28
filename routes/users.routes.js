@@ -5,6 +5,7 @@ const { authMiddleware } = require('../middleware/auth');
 const usersService = require('../services/users.service');
 const tagsService = require('../services/tags.service');
 const aiService = require('../services/ai.service');
+const aidb = require('../services/aidb.service');
 
 // GET /api/users/profile — Get current user's profile
 router.get('/profile', authMiddleware, async (req, res, next) => {
@@ -19,7 +20,7 @@ router.get('/profile', authMiddleware, async (req, res, next) => {
       ...(user.skill_tags || []).map(s => s.tag_id),
       ...(user.major_id ? [user.major_id] : []),
     ];
-    const tagNames = await tagsService.resolveTagNames(allTagIds);
+    const tagNames = await aidb.resolveTagNamesCached(allTagIds);
 
     res.json({ user, tagNames });
   } catch (err) { next(err); }
@@ -56,7 +57,7 @@ router.post('/auto-tag', authMiddleware, async (req, res, next) => {
     const { description } = req.body;
     if (!description) return res.status(400).json({ error: 'description is required' });
 
-    const allTags = await tagsService.getAllTags();
+    const { allTags } = await aidb.getTagsCached();
     const suggestions = await aiService.autoTagUser(description, allTags);
 
     res.json({ suggestions });
@@ -91,7 +92,7 @@ router.post('/generate-resume', authMiddleware, async (req, res, next) => {
       ...(user.skill_tags || []).map(s => s.tag_id),
       ...(user.major_id ? [user.major_id] : []),
     ];
-    const tagNames = await tagsService.resolveTagNames(allTagIds);
+    const tagNames = await aidb.resolveTagNamesCached(allTagIds);
 
     const resume = await aiService.generateResume(user, tagNames);
     res.json({ resume });

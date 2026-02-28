@@ -10,19 +10,14 @@ const postsService = require('../services/posts.service');
 const tagsService = require('../services/tags.service');
 const aiService = require('../services/ai.service');
 const { geminiGenerateJSON } = require('../config/vertex');
+const aidb = require('../services/aidb.service');
 
 // GET /api/insights — Generate AI insights for the current user's dashboard
 router.get('/', authMiddleware, async (req, res, next) => {
   try {
-    const user = await usersService.getUserByUid(req.uid);
+    // Use AIDB manager for efficient targeted queries (not loading all 10K users + 1K tags)
+    const { user, matches: recentMatches, events, tags: allTags, openPosts } = await aidb.getInsightContext(req.uid);
     if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const [recentMatches, events, allTags, openPosts] = await Promise.all([
-      matchesService.getMatchesByCandidate(req.uid),
-      eventsService.getAllEvents(),
-      tagsService.getAllTags(),
-      postsService.getOpenPosts(),
-    ]);
 
     const insights = await aiService.generateInsights(user, recentMatches, events, allTags, openPosts);
 
@@ -114,7 +109,7 @@ router.post('/ai-command', authMiddleware, async (req, res, next) => {
     const user = await usersService.getUserByUid(req.uid);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const allTags = await tagsService.getAllTags();
+    const { allTags } = await aidb.getTagsCached();
     const tagMap = {};
     allTags.forEach(t => { tagMap[t.id] = t.name; });
 
@@ -280,16 +275,11 @@ Return ONLY valid JSON.`;
     // Find teammates — use smart search logic
     if (plan && plan.action === 'find_teammates' && plan.data) {
       try {
-        const allUsers = await usersService.getAllUsers();
-        const query = (plan.data.query || '').toLowerCase();
-        const matched = allUsers
-          .filter(u => u.uid !== req.uid)
-          .filter(u => {
-            const skills = (u.skill_tags || []).map(s => tagMap[s.tag_id] || '').join(' ').toLowerCase();
-            const name = (u.name || '').toLowerCase();
-            const faculty = (u.faculty || '').toLowerCase();
-            return skills.includes(query) || name.includes(query) || faculty.includes(query);
-          })
+        // Smart pre-filter: query by relevant tags instead of loading all 10K users
+        const { candidates: preFiltered } = await aidb.smartQueryUsers(
+          (plan.data.query || '').toLowerCase(), req.uid, 20
+        );
+        const matched = preFiltered
           .slice(0, 5)
           .map(u => ({ name: u.name, faculty: u.faculty, uid: u.uid }));
         return res.json({
